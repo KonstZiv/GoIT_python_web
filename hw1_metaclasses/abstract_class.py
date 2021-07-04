@@ -14,7 +14,33 @@ import pickle
 import json
 from abc import abstractmethod, ABCMeta
 
+pre_dict = {
+    str(type([])):      'list',
+    str(type((1, ))):   'tuple',
+    str(type({1})):      'set',
+    str(type('')):      'str',
+    str(type(1)):       'int',
+    str(type(1.0)):     'float',
+    str(type(True)):    'bool',
+    str(type(None)):    'nontype'
+}
 
+
+def pre_error_handler(func):
+    # предназначен для фиксации ошибки в ходе сериазизации контейнера в json
+    # основная ожидаемая ошибка - несоотвествие типа сериализумеых данных допустимым
+    # данным (допустимые данные определяются словарем pre_dict)
+    def inner(*args):
+        try:
+            result = func(*args)
+            return result
+        except KeyError as message:
+            print(
+                f'Используется недопустимый к сериализации тип данных: {message.args[0]}')
+    return inner
+
+
+@pre_error_handler
 def pre_process(data):
     # функция рекурсивно обходит все вложенные контейнеры в исходном контейнере и
     # и в контейнерах, которые подвержены искажениям преобразования сохраняет в нулевом
@@ -24,12 +50,12 @@ def pre_process(data):
         cont_res = {}
         for key, value in data.items():
             if not isinstance(value, (set, list, tuple, dict)):
-                cont_res[key] = (str(type(key)), value)
+                cont_res[key] = (pre_dict[str(type(key))], value)
             else:
-                cont_res[key] = (str(type(key)), pre_process(value))
+                cont_res[key] = (pre_dict[str(type(key))], pre_process(value))
         return cont_res
     else:
-        cont_res = [str(type(data))]
+        cont_res = [pre_dict[str(type(data))]]
         for elem in data:
             if not isinstance(elem, (set, list, tuple, dict)):
                 cont_res.append(elem)
@@ -49,15 +75,16 @@ def post_process(data):
         return None
 
     types_dict = {
-        "<class 'list'>": list,
-        "<class 'tuple'>": tuple,
-        "<class 'set'>": set,
-        "<class 'str'>": str,
-        "<class 'int'>": int,
-        "<class 'float'>": float,
-        "<class 'bool'>": bool,
-        "<class 'NoneType'>": funk
+        'list':     list,
+        'tuple':    tuple,
+        'set':      set,
+        'str':      str,
+        'int':      int,
+        'float':    float,
+        'bool':     bool,
+        'nontype':  funk
     }
+
     if isinstance(data, dict):
         cont_res = {}
         for key, value in data.items():
@@ -89,7 +116,7 @@ class SerializationInterface(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def deserialize(self):
+    def deserialize(self, *args, **kwargs):
         pass
 
 
