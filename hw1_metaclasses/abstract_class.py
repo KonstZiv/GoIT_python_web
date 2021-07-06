@@ -14,6 +14,7 @@ import pickle
 import json
 from abc import abstractmethod, ABCMeta
 
+
 pre_dict = {
     str(type(list())):  'list',
     str(type(tuple())): 'tuple',
@@ -35,7 +36,7 @@ def pre_error_handler(func):
             result = func(*args)
             return result
         except KeyError as message:
-            print(
+            raise KeyError(
                 f'Используется недопустимый к сериализации тип данных: {message.args[0]}')
     return inner
 
@@ -151,6 +152,7 @@ class ContainerToInJson(SerializationInterface):
 
 
 if __name__ == '__main__':
+
     cont_list = [1, 2, 3, 4, 5, 6, 7, 8]
     cont_dict = {'one': 1, 'two': 2, 'three': 3,
                  'four': 4, 'five': 5, 6: 6, None: 7}
