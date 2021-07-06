@@ -117,7 +117,7 @@ class SerializationInterface(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def deserialize(self, *args, **kwargs):
+    def deserialize(self, serialize_data):
         pass
 
 
@@ -131,10 +131,10 @@ class ContainerToInBin(SerializationInterface):
     def serialize(self):
         return pickle.dumps(self.data) if self.data else None
 
-    def deserialize(self, bin_data):
+    def deserialize(self, serialize_data):
         # метод получает на вход бинарный файл и возвращает объект исходный контейнер
 
-        self.data = pickle.loads(bin_data)
+        self.data = pickle.loads(serialize_data)
         return self.data
 
 
@@ -146,8 +146,8 @@ class ContainerToInJson(SerializationInterface):
     def serialize(self):
         return json.dumps(pre_process(self.data)) if self.data else None
 
-    def deserialize(self, bin_data):
-        self.data = json.loads(bin_data)
+    def deserialize(self, serialize_data):
+        self.data = json.loads(serialize_data)
         return post_process(self.data)
 
 
