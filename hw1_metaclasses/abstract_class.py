@@ -15,13 +15,13 @@ import json
 from abc import abstractmethod, ABCMeta
 
 pre_dict = {
-    str(type([])):      'list',
-    str(type((1, ))):   'tuple',
-    str(type({1})):      'set',
-    str(type('')):      'str',
-    str(type(1)):       'int',
-    str(type(1.0)):     'float',
-    str(type(True)):    'bool',
+    str(type(list())):  'list',
+    str(type(tuple())): 'tuple',
+    str(type(set())):   'set',
+    str(type(str())):   'str',
+    str(type(int())):   'int',
+    str(type(float())): 'float',
+    str(type(bool())):  'bool',
     str(type(None)):    'nontype'
 }
 
