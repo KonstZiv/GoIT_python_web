@@ -16,6 +16,7 @@ import os
 import time
 from pathlib import Path
 from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 
 
 def normalize(text):  # --> str
@@ -107,14 +108,13 @@ def moves_files(sort_dict_full, path):
             new_name = normalize(elem.stem) + elem.suffix if not(
                 elem in sort_dict_full['unknown'][1]) else elem.name
             elem.replace(path / key / new_name)
-    threads = {}
+
     for key in sort_dict_full:
         if not (path / key).exists():
             (path / key).mkdir()
-        threads[key] = Thread(target=moves_files_kind, args=(key, ))
-        threads[key].start()
-    for key in threads:
-        threads[key].join()
+
+    with ThreadPoolExecutor() as executor:
+        executor.map(moves_files_kind, sort_dict_full)
 
 
 def delete_empty_folder(sort_dict_full, path):
