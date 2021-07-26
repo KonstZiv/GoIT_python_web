@@ -82,20 +82,22 @@ def creating_sort_list_in_dict(path, sort_dict):
     категриями в sort_dict"""
 
     unknown_file_set = set()
-    for element in path.iterdir():
-        if element.is_file():
-            # накапливаем имена всех файлов
-            unknown_file_set.add(element)
-            for key, value in sort_dict.items():
-                # проверяем соотвествие расширени файла ключу
-                if element.name.rsplit('.', 2)[-1] in set(value[0]):
-                    sort_dict[key][1].append(element)
-                    unknown_file_set.discard(element)
-                    continue
+    with ThreadPoolExecutor(max_workers=20) as executor:
 
-        else:
-            creating_sort_list_in_dict(element, sort_dict)
-    sort_dict['unknown'][1].extend(list(unknown_file_set))
+        for element in path.iterdir():
+            if element.is_file():
+                # накапливаем имена всех файлов
+                unknown_file_set.add(element)
+                for key, value in sort_dict.items():
+                    # проверяем соотвествие расширени файла ключу
+                    if element.name.rsplit('.', 2)[-1] in set(value[0]):
+                        sort_dict[key][1].append(element)
+                        unknown_file_set.discard(element)
+                        continue
+
+            else:
+                executor.submit(creating_sort_list_in_dict, element, sort_dict)
+        sort_dict['unknown'][1].extend(list(unknown_file_set))
     return sort_dict
 
 
