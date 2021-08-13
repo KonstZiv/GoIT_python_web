@@ -1,3 +1,4 @@
+import asyncio
 import aioshutil
 import re
 import sys
@@ -80,7 +81,7 @@ async def sort_and_movie(path: AsyncPath, name_of_directory: str, suffixes: set)
 
     for suffix in suffixes:
         async for elem in path.glob('**/*' + '.' + suffix):
-            await elem.replace(local_path / normalize(elem.name))
+            await elem.replace(local_path / (normalize(elem.stem) + elem.suffix))
 
     print(f'stop {name_of_directory}')
 
@@ -94,7 +95,7 @@ async def movie_to_unknown(path: AsyncPath, path_to: AsyncPath, ignore_list: lis
     async for elem in path.iterdir():
         is_file = await elem.is_file()
         if is_file:
-            await elem.replace(path_to / normalize(elem.name))
+            await elem.replace(path_to / (normalize(elem.stem) + elem.suffix))
         elif not(elem in ignore_list):
             await movie_to_unknown(elem, path_to, ignore_list)
 
@@ -144,9 +145,14 @@ async def main():
             if await path.is_dir():
                 sort_dict = get_sort_dist_strukture()
                 start_removing = time()
-                futures = [sort_and_movie(path, key, value)
-                           for key, value in sort_dict.items()]
-                await gather(*futures)
+                futur = [sort_and_movie(path, key, value)
+                         for key, value in sort_dict.items()]
+                await gather(*futur)
+                #results = []
+                # for f in futur:
+                #    results.append(asyncio.ensure_future(f))
+                # for r in results:
+                #    await r
                 print(
                     f'общее время перемещения файлов {time() - start_removing}')
                 start_unknown = time()
