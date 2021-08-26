@@ -4,21 +4,40 @@ import psycopg2
 
 from faker import Faker
 from psycopg2 import Error
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from random import randint
+
+DATABASE_NAME = 'student_db'
 
 fake = Faker('uk_UA')
 
 try:
     con = psycopg2.connect(
-        database="students_db",
         user="diet",
         password=input('input password for DB'),
         host="81.17.140.55",
         port="5432"
     )
-
-    print('Database opened successfully')
+    con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cursor = con.cursor()
+    print('Connect to PostgreSQL is success')
+
+    # СОЗДАНИЕ БАЗЫ ДАННЫХ
+    sql_create_database = f'create database {DATABASE_NAME}'
+    cursor.execute(sql_create_database)
+    print(f'database {DATABASE_NAME} is created')
+
+    # СОЗДАНИЕ ТАБЛИЦ В СООТВЕСТВИИ С DB_STRUCTURE
+    create_table_query = 'CREATE TABLE group (ID INT PRIMARY KEY     NOT NULL);'
+    cursor.execute(create_table_query)
+    con.commit()
+    print("Таблица group успешно создана в PostgreSQL")
+
+    create_table_query = 'CREATE TABLE student\
+            (id SERIAL PRIMARY KEY,\
+            last_name text NOT NULL,\
+            name text NOT NULL,\
+            group_id integer REFERENCES )'
 
     groups = (101, 102, 103)
     # заполняем таблицу group и таблицу student
