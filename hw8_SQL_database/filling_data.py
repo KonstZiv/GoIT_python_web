@@ -19,6 +19,8 @@ SUBJECT = ['Реляционная алгебра',
 START_DATA = '01-09-2021'
 DURATION_OF_STUDY = 60
 LESSON_PER_DAY = 3
+NUMBER_OF_GRADES_PER_LESSON = 5
+
 
 if __name__ == '__main__':
 
@@ -35,7 +37,7 @@ if __name__ == '__main__':
         cursor = con.cursor()
         print('Connect to PostgreSQL is success')
 
-        # ЗАПОЛНЯЕМ ТАБЛИЦУ TEACHER
+        '''# ЗАПОЛНЯЕМ ТАБЛИЦУ TEACHER
         for _ in range(MAX_TEACHER):
             # генерируем преподавателя
             # вносим данные студента в таблицу teacher
@@ -96,8 +98,42 @@ if __name__ == '__main__':
                     cursor.execute(insert_query)
                     con.commit()
             date_lesson = date_lesson + delta_day
-        print('Таблица lesson заполнена')
-    except (Exception, Error) as error:
+        print('Таблица lesson заполнена')'''
+
+        # ЗАПОЛНЕНИЕ ТАБЛИЦЫ GRADE
+
+        # начало запроса на вставку элементов в таблицу grade
+        insert_query = " INSERT INTO grade (grade, lesson_id, student_id) VALUES "
+        # создаем список всех занятий (id-занятия) с id-группы, в которй это занятие
+        read_lesson_query = "SELECT id, class_id FROM lesson"
+        cursor.execute(read_lesson_query)
+        lesson_list = cursor.fetchall()  # получили список из кортежей (id, class_id)
+        # создаем словарь, в котором ключи - id существующих групп, а значение - список кортежей
+        # содержащих все id студентов из єтой группы
+        student = {}
+        read_class_query = "SELECT id FROM class"
+        cursor.execute(read_class_query)
+        class_list = cursor.fetchall()  # получили список из  (id,) состоящий из id групп
+        for class_ in class_list:
+            cursor.execute(
+                f"SELECT id FROM student WHERE class_id={class_[0]}")
+            student[class_] = cursor.fetchall()
+        # итерируемся по перечню всех занятий и, учитывая номер группы для которой это занятие
+        # и используя списки студентов для этих групп формируем случайным образом оценки
+        # (для каждого занятия количество оценок равно NUMBER_OF_GRADES_PER_LESSON)
+        # для случайно выбранных студентов
+        for lesson in lesson_list:
+            for _ in range(NUMBER_OF_GRADES_PER_LESSON):
+                insert_query = insert_query + \
+                    f" ({randint(0, 100)}, {lesson[0]}, {choice(student[(lesson[1], )])[0]}),"
+        # убираем последюю запятую в запросе (смотри строку выше)
+        insert_query = insert_query[0:(len(insert_query) - 1)]
+        print(insert_query)
+        cursor.execute(insert_query)
+        con.commit()
+        print('Таблица grade заполнена')
+
+    except (Exception,  Error) as error:
         print('Ошибка при работе с PostgreSQL', error)
     finally:
         if con:
