@@ -18,6 +18,8 @@ try:
     print('Connect to PostgreSQL is success')
 
     # - Список студентов в группе.
+    print('-' * 80)
+    print('Список студентов в группе.')
     # получаем перечень групп
     cursor.execute("SELECT id FROM class")
     class_list = cursor.fetchall()
@@ -32,12 +34,19 @@ try:
     for student in class_list:
         print(f'--> {student[0]}  {student[1]}')
 
+    input('нажмите "ввод" для продолжения')
+
     # - Средний балл в потоке.
+    print('-' * 80)
+    print('Средний балл в потоке.')
     cursor.execute("SELECT AVG(grade) FROM grade")
     average_grade = cursor.fetchall()
     print(f'средняя оценка по потоку:  {average_grade[0][0]}')
+    input('нажмите "ввод" для продолжения')
 
     # - средний балл в группе по одному предмету.
+    print('-' * 80)
+    print('средний балл в группе по одному предмету')
     subject_id = 27
     cursor.execute(f'SELECT title_subject FROM subject WHERE id={subject_id}')
     subject = cursor.fetchall()
@@ -51,13 +60,14 @@ try:
     average_grade = cursor.fetchall()
     print(
         f'средний баз по дисциплине "{subject[0][0]}" группы {class_id}: {average_grade[0][0]} ')
+    input('нажмите "ввод" для продолжения')
 
     # - Какие курсы читает преподаватель
     # при выбранной модели каждый преподаватель для своей группы читает все предметы (как в GoIT)
 
-    # - Оценки студентов в группе по предмету.
-
     # - 5 студентов с наибольшим средним баллом по всем предметам.
+    print('-' * 80)
+    print('5 студентов с наибольшим средним баллом по всем предметам')
     cursor.execute("SELECT AVG(grade), name, last_name\
                    FROM student\
                    INNER JOIN grade ON student_id=student.id\
@@ -66,8 +76,11 @@ try:
                    LIMIT 5")
     best_result_5 = cursor.fetchall()
     print(f'5 студентов с наибольшим средним баллом: {best_result_5}')
+    input('нажмите "ввод" для продолжения')
 
     # - 1 студент с наивысшим средним баллом по одному предмету.
+    print('-' * 80)
+    print('1 студент с наивысшим средним баллом по одному предмету')
     subject_id = 28
     cursor.execute(f'SELECT title_subject FROM subject WHERE id={subject_id}')
     subject = cursor.fetchall()
@@ -82,19 +95,25 @@ try:
     best_result_for_subject = cursor.fetchall()
     print(
         f'студент с наибольшим средним баллом по предмету "{subject[0][0]}":  {best_result_for_subject[0]}')
+    input('нажмите "ввод" для продолжения')
 
     # - Какие курсы читает преподаватель
     # - Список курсов, которые посещает студент.
     # при выбранной модели каждый преподаватель для своей группы читает все предметы (как в GoIT)
+    print('-' * 80)
+    print('Какие курсы читает преподаватель')
     cursor.execute(f'SELECT * FROM subject')
     subjects = cursor.fetchall()
     for subject in subjects:
         print(
             f'код предмета: {subject[0]}--> название предмета:  {subject[1]}')
+    input('нажмите "ввод" для продолжения')
 
     # - Средний балл, который ставит преподаватель.
     # при выббранной модели обучения (преподаватель ведет все предметы в своей группе)
     # средний бал у группе это и есть средний бал, который ставит преподаватель
+    print('-' * 80)
+    print('Средний балл, который ставит преподаватель')
     class_id = 102
     cursor.execute(
         f'SELECT last_name, name FROM teacher INNER JOIN class ON teacher.id=teacher_id WHERE class.id={class_id}')
@@ -106,10 +125,13 @@ try:
     average_grade_teacher = cursor.fetchall()
     print(
         f'средний бал всех оценок, выставленных преподавателем {teacher_name[0][0]} {teacher_name[0][1]} равен {average_grade_teacher[0][0]}')
+    input('нажмите "ввод" для продолжения')
 
     # - Список курсов, которые студенту читает преподаватель.
     # при выбранной системе - один преподаватель закреплен за группой и ведет в ней все занятия
     # перечень всех курсов это и есть искомый список
+    print('-' * 80)
+    print('Список курсов, которые студенту читает преподаватель')
     student_id = 455
     cursor.execute(
         f'SELECT name, last_name, class_id FROM student WHERE id={student_id}')
@@ -128,10 +150,12 @@ try:
     for subject in subjects:
         print(
             f'код предмета: {subject[0]}--> название предмета:  {subject[1]}')
-    print(student_name, student_last_name, class_id)
+    input('нажмите "ввод" для продолжения')
 
     # - Средний балл, который преподаватель ставит студенту.
     # - это средний бал студента вцелом, так как все занятия ведет один преподаватель
+    print('-' * 80)
+    print('Средний балл, который преподаватель ставит студенту')
     student_id = 455
     cursor.execute(f'SELECT AVG(grade)\
                    FROM grade\
@@ -143,8 +167,11 @@ try:
     student_name, student_last_name = cursor.fetchall()[0]
     print(
         f'средний балл студента {student_name} {student_last_name}: {avg_grade_student[0]}')
+    input('нажмите "ввод" для продолжения')
 
     # - Оценки студентов в группе по предмету.
+    print('-' * 80)
+    print('Оценки студентов в группе по предмету')
     subject_id = 28  # выбираем предмет
     class_id = 101  # выбираем группу
     cursor.execute(f'SELECT title_subject FROM subject WHERE id={subject_id}')
@@ -161,8 +188,11 @@ try:
         student_name, student_last_name, grade, lesson_date = res_tuple
         print(
             f'  {student_name} {student_last_name} оценка: {grade} получена  {lesson_date}')
+    input('нажмите "ввод" для продолжения')
 
     # - Оценки студентов в группе по предмету на последнем занятии.
+    print('-' * 80)
+    print('Оценки студентов в группе по предмету на последнем занятии')
     class_id = 103  # устанавливаем номер группы для запроса
     subject_id = 29  # устанавливаем id предмета для запроса
     cursor.execute(f'SELECT title_subject FROM subject WHERE id={subject_id}')
