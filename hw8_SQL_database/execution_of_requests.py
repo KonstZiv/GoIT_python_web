@@ -130,10 +130,60 @@ try:
             f'код предмета: {subject[0]}--> название предмета:  {subject[1]}')
     print(student_name, student_last_name, class_id)
 
-# - Оценки студентов в группе по предмету.
-# - Оценки студентов в группе по предмету на последнем занятии.
-# - Средний балл, который преподаватель ставит студенту.
+    # - Средний балл, который преподаватель ставит студенту.
+    # - это средний бал студента вцелом, так как все занятия ведет один преподаватель
+    student_id = 455
+    cursor.execute(f'SELECT AVG(grade)\
+                   FROM grade\
+                   INNER JOIN student ON student.id=student_id\
+                   WHERE student.id={student_id}')
+    avg_grade_student = cursor.fetchall()[0]
+    cursor.execute(
+        f'SELECT name, last_name FROM student WHERE id={student_id}')
+    student_name, student_last_name = cursor.fetchall()[0]
+    print(
+        f'средний балл студента {student_name} {student_last_name}: {avg_grade_student[0]}')
 
+    # - Оценки студентов в группе по предмету.
+    subject_id = 28  # выбираем предмет
+    class_id = 101  # выбираем группу
+    cursor.execute(f'SELECT title_subject FROM subject WHERE id={subject_id}')
+    subject_name = cursor.fetchall()[0][0]
+    cursor.execute(f'SELECT name, last_name, grade, lesson.date\
+                   FROM student\
+                   INNER JOIN grade ON student.id=student_id\
+                   INNER JOIN lesson ON lesson_id=lesson.id\
+                   WHERE subject_id={subject_id} AND student.class_id={class_id}')
+    #student_name, student_last_name, grade, lesson_date = cursor.fetchall()[0]
+    result = cursor.fetchall()
+    print(f'оценки студентов группы {class_id} по предмету "{subject_name}":')
+    for res_tuple in result:
+        student_name, student_last_name, grade, lesson_date = res_tuple
+        print(
+            f'  {student_name} {student_last_name} оценка: {grade} получена  {lesson_date}')
+
+    # - Оценки студентов в группе по предмету на последнем занятии.
+    class_id = 103  # устанавливаем номер группы для запроса
+    subject_id = 29  # устанавливаем id предмета для запроса
+    cursor.execute(f'SELECT title_subject FROM subject WHERE id={subject_id}')
+    subject_name = cursor.fetchall()[0][0]  # получаем полное название предмета
+    # опрежеляем дату последнего занятия по этому предмету
+    cursor.execute(f'SELECT MAX(lesson.date)\
+                   FROM lesson\
+                   WHERE class_id={class_id} AND subject_id={subject_id}')
+    date_last = cursor.fetchall()[0][0]
+    cursor.execute(f"SELECT name, last_name, grade\
+                   FROM student\
+                   INNER JOIN grade ON student.id=student_id\
+                   INNER JOIN lesson ON lesson_id=lesson.id\
+                   WHERE subject_id={subject_id} AND student.class_id={class_id} AND lesson.date='{date_last}'")
+    result = cursor.fetchall()
+    print(
+        f'последнее занятие по дисциплине: "{subject_name}" состоялось {date_last}.')
+    print('Получены следующие оценки: ')
+    for res_tuple in result:
+        student_name, student_last_name, grade = res_tuple
+        print(f'студент {student_name} {student_last_name}, оценка: {grade}')
 
 except (Exception, Error) as error:
     print('Ошибка при работе с PostgreSQL', error)
